@@ -70,6 +70,11 @@
     </div>
 
     <script>
+
+import { createClient } from '@supabase/supabase-js'
+const supabaseUrl = 'https://dijdxuhvyvvwqtlpkajt.supabase.co'
+const supabaseKey = process.env.SUPABASE_KEY
+const supabase = createClient(supabaseUrl, supabaseKey)
         // Initialize Supabase
         const { createClient } = supabase;
         const supabaseUrl = 'https://dijdxuhvyvvwqtlpkajt.supabase.co';
@@ -78,14 +83,10 @@
 
         // Sign up function
         async function signUp() {
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const { user, error } = await supabase.auth.signUp({ email, password });
-            if (error) {
-                alert("Error signing up: " + error.message);
-            } else {
-                alert("User signed up: " + user.email);
-            }
+let { data, error } = await supabase.auth.signUp({
+  email: 'signup-email',
+  password: 'signup-password'
+})
         }
 
         // Sign in function
