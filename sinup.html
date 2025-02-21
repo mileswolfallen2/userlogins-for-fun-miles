@@ -51,6 +51,7 @@
         <input type="email" id="signup-email" placeholder="Email" required>
         <input type="password" id="signup-password" placeholder="Password" required>
         <button onclick="signUp()">Sign Up</button>
+        <input value="hisinup" type="button" onclick="signUp()">
     </div>
 
     <div class="form-container">
@@ -71,8 +72,8 @@
     <script>
         // Initialize Supabase
         const { createClient } = supabase;
-        const supabaseUrl = 'YOUR_SUPABASE_URL';
-        const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+        const supabaseUrl = 'https://dijdxuhvyvvwqtlpkajt.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpamR4dWh2eXZ2d3F0bHBrYWp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAxNjU3MzcsImV4cCI6MjA1NTc0MTczN30.gz_hX11RC6gKwIpGlbBWk1s7skDOwix-FQh_chE5xkU';
         const supabase = createClient(supabaseUrl, supabaseKey);
 
         // Sign up function
