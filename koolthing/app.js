@@ -1,11 +1,16 @@
 import { supabase } from './supabaseClient.js';
+import bcrypt from 'bcryptjs';
 
 document.getElementById('register-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('register-email').value;
   const password = document.getElementById('register-password').value;
 
-  const { user, error } = await supabase.auth.signUp({ email, password });
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const { data, error } = await supabase
+    .from('users')
+    .insert([{ email, password: hashedPassword }]);
   if (error) {
     alert('Error registering user: ' + error.message);
   } else {
@@ -18,13 +23,26 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   const email = document.getElementById('login-email').value;
   const password = document.getElementById('login-password').value;
 
-  const { session, error } = await supabase.auth.signIn({ email, password });
-  if (error) {
+  const { data, error } = await supabase
+    .from('users')
+    .select('id, password')
+    .eq('email', email)
+    .single();
+
+  if (error || !data) {
     alert('Invalid credentials');
-  } else {
-    document.cookie = `token=${session.access_token}; Secure; HttpOnly`;
-    alert('User logged in successfully');
+    return;
   }
+
+  const validPassword = await bcrypt.compare(password, data.password);
+  if (!validPassword) {
+    alert('Invalid credentials');
+    return;
+  }
+
+  const token = btoa(JSON.stringify({ userId: data.id }));
+  document.cookie = `token=${token}; Secure; HttpOnly`;
+  alert('User logged in successfully');
 });
 
 document.getElementById('cookie-form').addEventListener('submit', async (e) => {
@@ -37,10 +55,10 @@ document.getElementById('cookie-form').addEventListener('submit', async (e) => {
     return;
   }
 
-  const { user } = await supabase.auth.api.getUser(token);
+  const { userId } = JSON.parse(atob(token));
   const { data, error } = await supabase
     .from('cookies')
-    .insert([{ user_id: user.id, cookie: JSON.stringify(cookieData) }]);
+    .insert([{ user_id: userId, cookie: JSON.stringify(cookieData) }]);
   if (error) {
     alert('Error saving cookie to cloud');
   } else {
@@ -56,11 +74,11 @@ document.getElementById('retrieve-cookie').addEventListener('click', async () =>
     return;
   }
 
-  const { user } = await supabase.auth.api.getUser(token);
+  const { userId } = JSON.parse(atob(token));
   const { data, error } = await supabase
     .from('cookies')
     .select('cookie')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .single();
   if (error) {
     alert('Error retrieving cookie from cloud');
