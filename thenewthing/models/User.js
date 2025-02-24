@@ -1,0 +1,1 @@
+// This file can be omitted as Supabase handles user management
