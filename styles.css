@@ -10,8 +10,8 @@ body {
     margin: auto;
     background: white;
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 h1, h2 {
@@ -23,31 +23,36 @@ form {
 }
 
 input[type="email"],
+input[type="text"],
 input[type="password"],
 textarea {
     width: 100%;
     padding: 10px;
-    margin: 5px 0;
+    margin: 10px 0;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
 button {
-    background-color: #28a745;
+    padding: 10px 15px;
+    background-color: #5cb85c;
     color: white;
-    padding: 10px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
 }
 
 button:hover {
-    background-color: #218838;
+    background-color: #4cae4c;
 }
 
-#saved-text {
+#saved-notes {
+    margin-top: 20px;
+}
+
+.note {
     background: #e9ecef;
     padding: 10px;
+    margin: 5px 0;
     border-radius: 4px;
-    margin-top: 10px;
 }

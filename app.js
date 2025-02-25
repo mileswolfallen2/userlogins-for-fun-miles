@@ -8,6 +8,7 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
 
     try {
         const user = await userbase.signUp({ username: email, password });
+        // Save user info in cookies
         document.cookie = `user=${user.username}; path=/;`;
         alert('Signup successful!');
     } catch (error) {
@@ -23,51 +24,17 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 
     try {
         const user = await userbase.signIn({ username: email, password });
+        // Save user info in cookies
         document.cookie = `user=${user.username}; path=/;`;
         alert('Login successful!');
         document.getElementById('form-container').style.display = 'none';
-        document.getElementById('user-container').style.display = 'block';
-        loadUserText(user.username);
+        document.getElementById('notes-container').style.display = 'block';
+        loadNotes();
     } catch (error) {
         console.error('Login error:', error);
         alert('Login failed: ' + error.message);
     }
 });
-
-document.getElementById('save-text').addEventListener('click', async () => {
-    const text = document.getElementById('user-text').value;
-    const user = getCookie('user');
-
-    if (user) {
-        try {
-            await userbase.upsertItem({
-                database: 'user-data',
-                item: { username: user, text: text },
-            });
-            alert('Text saved!');
-            displaySavedText(text);
-        } catch (error) {
-            console.error('Error saving text:', error);
-        }
-    }
-});
-
-// Function to load user text
-async function loadUserText(username) {
-    try {
-        const items = await userbase.getItems({ database: 'user-data', username });
-        if (items.length > 0) {
-            document.getElementById('saved-text').innerText = items[0].text;
-        }
-    } catch (error) {
-        console.error('Error loading text:', error);
-    }
-}
-
-// Function to display saved text
-function displaySavedText(text) {
-    document.getElementById('saved-text').innerText = text;
-}
 
 // Function to load cookies
 function loadCookies() {
@@ -76,15 +43,39 @@ function loadCookies() {
     if (userCookie) {
         const user = userCookie.split('=')[1];
         alert(`Welcome back, ${user}!`);
+        document.getElementById('form-container').style.display = 'none';
+        document.getElementById('notes-container').style.display = 'block';
+        loadNotes();
     }
 }
 
-// Function to get a specific cookie value
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
+// Load notes from local storage
+function loadNotes() {
+    const notes = JSON.parse(localStorage.getItem('userNotes')) || [];
+    const savedNotesDiv = document.getElementById('saved-notes');
+    savedNotesDiv.innerHTML = '';
+    notes.forEach(note => {
+        const noteDiv = document.createElement('div');
+        noteDiv.className = 'note';
+        noteDiv.textContent = note;
+        savedNotesDiv.appendChild(noteDiv);
+    });
 }
+
+// Save note to local storage
+document.getElementById('save-note').addEventListener('click', () => {
+    const noteInput = document.getElementById('note-input');
+    const note = noteInput.value;
+    if (note) {
+        const notes = JSON.parse(localStorage.getItem('userNotes')) || [];
+        notes.push(note);
+        localStorage.setItem('userNotes', JSON.stringify(notes));
+        noteInput.value = '';
+        loadNotes();
+    } else {
+        alert('Please enter a note.');
+    }
+});
 
 // Load cookies on page load
 window.onload = loadCookies;

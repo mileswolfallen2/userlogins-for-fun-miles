@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Userbase Login/Signup</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://unpkg.com/userbase-js/dist/userbase.min.js"></script>
+    <script type="text/javascript" src="https://sdk.userbase.com/2/userbase.js"></script>
 </head>
 <body>
     <div class="container">
@@ -13,7 +13,7 @@
         <div id="form-container">
             <form id="signup-form">
                 <h2>Sign Up</h2>
-                <input type="email" id="signup-email" placeholder="Email" required>
+                <input type="text" id="signup-email" placeholder="username" required>
                 <input type="password" id="signup-password" placeholder="Password" required>
                 <button type="submit">Sign Up</button>
             </form>
@@ -24,12 +24,11 @@
                 <button type="submit">Login</button>
             </form>
         </div>
-        <div id="user-container" style="display: none;">
-            <h2>Your Text</h2>
-            <textarea id="user-text" placeholder="Type something..." rows="5"></textarea>
-            <button id="save-text">Save Text</button>
-            <h3>Saved Text:</h3>
-            <div id="saved-text"></div>
+        <div id="notes-container" ">
+            <h2>Your Notes</h2>
+            <textarea id="note-input" placeholder="Write your note here..."></textarea>
+            <button id="save-note">Save Note</button>
+            <div id="saved-notes"></div>
         </div>
     </div>
     <script src="app.js"></script>
