@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <script type="text/javascript" src="https://sdk.userbase.com/2/userbase.js"></script>
 </head>
-<body>
+<body onload="checkUserLoggedIn()">
     <div class="container">
         <h1>Notes Management</h1>
         <div id="form-container">
@@ -24,12 +24,18 @@
                 <button type="submit">Login</button>
             </form>
         </div>
-        <div id="note-management">
+        <div id="note-management" style="display: none;">
             <h2>Note Management</h2>
             <input type="text" id="note-input" placeholder="Write your note here..." />
             <button id="save-note">Save Note</button>
             <button id="logout-button">Logout</button>
             <ul id="notes-list" style="margin-top: 20px;"></ul>
+            <div id="cookies-container">
+                <h2>Cookies</h2>
+                <p id="cookies-display"></p>
+                <textarea id="cookies-input" placeholder="Edit your cookies here..."></textarea>
+                <button id="save-cookies">Save Cookies</button>
+            </div>
         </div>
     </div>
     <script src="app.js"></script>
