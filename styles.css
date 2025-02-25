@@ -23,9 +23,7 @@ form {
 }
 
 input[type="email"],
-input[type="text"],
-input[type="password"],
-textarea {
+input[type="password"] {
     width: 100%;
     padding: 10px;
     margin: 10px 0;
@@ -44,15 +42,4 @@ button {
 
 button:hover {
     background-color: #4cae4c;
-}
-
-#saved-notes {
-    margin-top: 20px;
-}
-
-.note {
-    background: #e9ecef;
-    padding: 10px;
-    margin: 5px 0;
-    border-radius: 4px;
 }
