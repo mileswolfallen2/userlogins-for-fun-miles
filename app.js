@@ -11,7 +11,6 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
 
     try {
         const user = await userbase.signUp({ username: username, password });
-        document.cookie = `user=${user.username}; path=/;`;
         alert('Signup successful!');
     } catch (error) {
         console.error('Signup error:', error);
@@ -28,9 +27,8 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
         currentUser = await userbase.signIn({
             username: username,
             password: password,
-            rememberMe: 'local' // Set session persistence
+            rememberMe: 'none' // Do not remember the session
         });
-        document.cookie = `user=${currentUser.username}; path=/;`;
         alert('Login successful!');
         document.getElementById('form-container').style.display = 'none';
         document.getElementById('note-management').style.display = 'block';
