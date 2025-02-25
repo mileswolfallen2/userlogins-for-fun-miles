@@ -1,13 +1,3 @@
-// Import the Supabase client
-import { createClient } from '@supabase/supabase-js';
-
-// Load environment variables (if using Node.js)
-require('dotenv').config();
-
-const supabaseUrl = 'https://ebakaygajiweacgkvhbl.supabase.co';
-const supabaseKey = process.env.SUPABASE_KEY; // Use the environment variable
-const supabase = createClient(supabaseUrl, supabaseKey);
-
 // Initialize Userbase
 userbase.init({ appId: '7cd8e25b-723d-4af7-8bdf-ef558bd0dfcc' }); // Replace with your Userbase app ID
 
@@ -49,92 +39,74 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     }
 });
 
-// Function to save note to Supabase
-async function saveNote() {
+// Function to save note to local storage
+function saveNote() {
     const note = document.getElementById('note-input').value;
     if (!note) {
         alert('Please enter a note to save.');
         return;
     }
 
-    try {
-        const { data, error } = await supabase
-            .from('notes')
-            .insert([{ user_id: currentUser.id, text: note }]); // Use currentUser object
-        if (error) throw error;
-        alert('Note saved successfully!');
-        document.getElementById('note-input').value = ''; // Clear input
-    } catch (error) {
-        console.error('Error saving note:', error);
-        alert('Failed to save note: ' + error.message);
+    // Get existing notes from local storage
+    const notes = JSON.parse(localStorage.getItem('notes')) || [];
+    notes.push({ userId: currentUser.userId, text: note }); // Add new note
+    localStorage.setItem('notes', JSON.stringify(notes)); // Save to local storage
+
+    alert('Note saved successfully!');
+    document.getElementById('note-input').value = ''; // Clear input
+}
+
+// Function to load notes from local storage
+function loadNotes() {
+    const notesList = document.getElementById('notes-list');
+    notesList.innerHTML = ''; // Clear existing notes
+
+    // Get notes from local storage
+    const notes = JSON.parse(localStorage.getItem('notes')) || [];
+    if (notes.length > 0) {
+        notes.forEach(note => {
+            const noteItem = document.createElement('li');
+            noteItem.className = 'note-item';
+            noteItem.textContent = note.text;
+
+            // Create delete button
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.style.marginLeft = '10px';
+            deleteButton.onclick = () => deleteNote(note.text); // Bind delete function
+
+            noteItem.appendChild(deleteButton);
+            notesList.appendChild(noteItem);
+        });
+    } else {
+        alert('No notes found for this user.');
     }
 }
 
-// Function to load notes from Supabase
-async function loadNotes() {
-    try {
-        const { data, error } = await supabase
-            .from('notes')
-            .select('*')
-            .eq('user_id', currentUser.id); // Filter by user ID
-
-        const notesList = document.getElementById('notes-list');
-        notesList.innerHTML = ''; // Clear existing notes
-
-        if (data.length > 0) {
-            data.forEach(note => {
-                const noteItem = document.createElement('li');
-                noteItem.className = 'note-item';
-                noteItem.textContent = note.text;
-
-                // Create delete button
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Delete';
-                deleteButton.style.marginLeft = '10px';
-                deleteButton.onclick = () => deleteNote(note.id); // Bind delete function
-
-                noteItem.appendChild(deleteButton);
-                notesList.appendChild(noteItem);
-            });
-        } else {
-            alert('No notes found for this user.');
-        }
-    } catch (error) {
-        console.error('Error loading notes:', error);
-        alert('Failed to load notes: ' + error.message);
-    }
+// Function to delete a note from local storage
+function deleteNote(noteText) {
+    const notes = JSON.parse(localStorage.getItem('notes')) || [];
+    const updatedNotes = notes.filter(note => note.text !== noteText); // Remove the note
+    localStorage.setItem('notes', JSON.stringify(updatedNotes)); // Update local storage
+    alert('Note deleted successfully!');
+    loadNotes(); // Reload notes after deletion
 }
 
-// Function to delete a note from Supabase
-async function deleteNote(noteId) {
+// Function to log out the user
+async function logout() {
     try {
-        const { error } = await supabase
-            .from('notes')
-            .delete()
-            .eq('id', noteId); // Delete by note ID
-        if (error) throw error;
-        alert('Note deleted successfully!');
-        loadNotes(); // Reload notes after deletion
+        await userbase.signOut(); // Sign out from Userbase
+        currentUser = null; // Clear current user
+        document.getElementById('form-container').style.display = 'block'; // Show login/signup forms
+        document.getElementById('note-management').style.display = 'none'; // Hide note management
+        alert('Logged out successfully!');
     } catch (error) {
-        console.error('Error deleting note:', error);
-        alert('Failed to delete note: ' + error.message);
+        console.error('Logout error:', error);
+        alert('Logout failed: ' + error.message);
     }
 }
-
-// Function to get user metadata
-async function getUserMetadata() {
-    try {
-        const user = supabase.auth.user();
-        alert(`User Metadata Retrieved: ${JSON.stringify(user)}`);
-    } catch (error) {
-        console.error('Error fetching user metadata:', error);
-        alert('Error fetching user metadata: ' + error.message);
-    }
-}
-
-// Example usage of getUserMetadata
-document.getElementById('get-user-metadata').addEventListener('click', getUserMetadata);
 
 // Event listeners for buttons
 document.getElementById('save-note').addEventListener('click', saveNote);
 document.getElementById('load-notes').addEventListener('click', loadNotes);
+document.getElementById('logout-button').addEventListener('click', logout);
