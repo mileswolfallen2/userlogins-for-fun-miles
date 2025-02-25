@@ -8,6 +8,7 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
 
     try {
         const user = await userbase.signUp({ username: email, password });
+        // Save user info in cookies
         document.cookie = `user=${user.username}; path=/;`;
         alert('Signup successful!');
     } catch (error) {
@@ -23,54 +24,73 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 
     try {
         const user = await userbase.signIn({ username: email, password });
+        // Save user info in cookies
         document.cookie = `user=${user.username}; path=/;`;
-        const username = document.getElementById('login-username').value
         alert('Login successful!');
         document.getElementById('form-container').style.display = 'none';
-        document.getElementById('cookie-management').style.display = 'block';
+        document.getElementById('notes-container').style.display = 'block';
+        loadNotes();
     } catch (error) {
         console.error('Login error:', error);
         alert('Login failed: ' + error.message);
     }
 });
 
-// Function to save cookies to Userbase
-async function saveCookies() {
-    const cookies = document.cookie;
-    try {
-        const user = await userbase.getUser();
-        await userbase.insert({
-            database: 'user_cookies',
-            item: { userId: user.userId, cookies: cookies }
-        });
-        alert('Cookies saved successfully!');
-    } catch (error) {
-        console.error('Error saving cookies:', error);
-        alert('Failed to save cookies: ' + error.message);
+// Function to load cookies
+function loadCookies() {
+    const cookies = document.cookie.split('; ');
+    const userCookie = cookies.find(row => row.startsWith('user='));
+    if (userCookie) {
+        const user = userCookie.split('=')[1];
+        alert(`Welcome back, ${user}!`);
+        document.getElementById('form-container').style.display = 'none';
+        document.getElementById('notes-container').style.display = 'block';
+        loadNotes();
     }
 }
 
-// Function to load cookies from Userbase
-async function loadCookies() {
-    try {
-        const user = await userbase.getUser();
-        const result = await userbase.query({
-            database: 'user_cookies',
-            filter: { userId: user.userId }
-        });
-        if (result.length > 0) {
-            const cookies = result[0].cookies;
-            document.cookie = cookies;
-            alert('Cookies loaded successfully!');
-        } else {
-            alert('No cookies found for this user.');
-        }
-    } catch (error) {
-        console.error('Error loading cookies:', error);
-        alert('Failed to load cookies: ' + error.message);
-    }
+// Load notes from local storage
+function loadNotes() {
+    const notes = JSON.parse(localStorage.getItem('userNotes')) || [];
+    const savedNotesDiv = document.getElementById('saved-notes');
+    savedNotesDiv.innerHTML = '';
+    notes.forEach((note, index) => {
+        const noteDiv = document.createElement('div');
+        noteDiv.className = 'note';
+        noteDiv.textContent = note;
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.className = 'delete-note';
+        deleteButton.onclick = () => deleteNote(index);
+
+        noteDiv.appendChild(deleteButton);
+        savedNotesDiv.appendChild(noteDiv);
+    });
 }
 
-// Event listeners for buttons
-document.getElementById('save-cookies').addEventListener('click', saveCookies);
-document.getElementById('load-cookies').addEventListener('click', loadCookies);
+// Delete note from local storage
+function deleteNote(index) {
+    const notes = JSON.parse(localStorage.getItem('userNotes')) || [];
+    notes.splice(index, 1);
+    localStorage.setItem('userNotes', JSON.stringify(notes));
+    loadNotes();
+}
+
+// Save note to local storage
+document.getElementById('save-note').addEventListener('click', () => {
+    const noteInput = document.getElementById('note-input');
+    const note = noteInput.value;
+    if (note) {
+        const notes = JSON.parse(localStorage.getItem('userNotes')) || [];
+        notes.push(note);
+        localStorage.setItem('userNotes', JSON.stringify(notes));
+        noteInput.value = '';
+        loadNotes();
+    } else {
+        alert('Please enter a note.');
+    }
+});
+
+// Load cookies on page load
+window.onload = loadCookies;
