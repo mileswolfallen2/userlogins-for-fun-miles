@@ -187,18 +187,12 @@ document.getElementById('save-cookies-cloud').addEventListener('click', async ()
     }
 });
 
-// Function to load cookies from the cloud
 async function loadCookiesFromCloud() {
     try {
         // Ensure the database is open
         if (!isDatabaseOpen) {
             await openUserbaseDatabase();
         }
-
-        // Clear existing cookies
-        document.cookie.split(";").forEach((cookie) => {
-            document.cookie = cookie.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-        });
 
         // Fetch cookies from the cloud
         const items = await userbase.getDatabaseItems({ databaseName: 'notes-database' });
@@ -207,19 +201,26 @@ async function loadCookiesFromCloud() {
             cookiesFromCloud += item.item.text;
         });
 
-        // Save cookies to the page
-        document.cookie = `userCookies=${cookiesFromCloud}; path=/`;
+        // Replace the current cookies with the loaded ones
+        document.cookie.split(";").forEach((cookie) => {
+            document.cookie = cookie.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
 
-        // Display the cookies on the page
-        document.getElementById('cookies-display').innerText = cookiesFromCloud;
-        // Alert the user that the cookies have been loaded
-        alert('Cookies loaded from cloud!');
+        const cookies = cookiesFromCloud.split('\n');
+        cookies.forEach(cookie => {
+            document.cookie = cookie.trim();
+        });
+
+        // Display the cookies in the text box
+        document.getElementById('cookies-input').value = cookiesFromCloud;
+
+        // Alert the user that the cookies have been loaded and replaced
+        alert('Cookies loaded from cloud and replaced!');
     } catch (error) {
         console.error('Error loading cookies from cloud:', error);
         alert('Failed to load cookies from cloud: ' + error.message);
     }
 }
-
 // Add event listener to the "Load Cookies from Cloud" button
 document.getElementById('load-cookies-cloud').addEventListener('click', loadCookiesFromCloud);
 
