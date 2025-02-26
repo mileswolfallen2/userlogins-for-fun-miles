@@ -4,6 +4,7 @@ userbase.init({ appId: '7cd8e25b-723d-4af7-8bdf-ef558bd0dfcc' }); // Replace wit
 let currentUser; // Variable to hold the current user object
 let isDatabaseOpen = false; // Flag to check if the database is open
 
+
 document.getElementById('signup-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const username = document.getElementById('signup-username').value; // Email as username
@@ -12,11 +13,13 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
     try {
         const user = await userbase.signUp({ username: username, password });
         alert('Signup successful!');
+        await logout(); // Log out the user immediately after signup
     } catch (error) {
         console.error('Signup error:', error);
         alert('Signup failed: ' + error.message);
     }
 });
+
 
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
