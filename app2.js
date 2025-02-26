@@ -1,4 +1,4 @@
-Userbase
+//Userbase
 userbase.init({ appId: '7cd8e25b-723d-4af7-8bdf-ef558bd0dfcc' }); // Replace with your Userbase app ID
 
 let currentUser; // Variable to hold the current user object
