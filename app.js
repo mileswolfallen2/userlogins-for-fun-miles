@@ -158,24 +158,28 @@ document.getElementById('save-cookies-cloud').addEventListener('click', async ()
 
     try {
         // Clear existing items in the database
-        const items = await userbase.getItems({ databaseName: 'notes-database' });
-        for (const item of items) {
-            await userbase.deleteItem({
-                databaseName: 'notes-database',
-                itemId: item.itemId
-            });
-        }
+        await userbase.openDatabase({
+            databaseName: 'notes-database',
+            changeHandler: async function (items) {
+                for (const item of items) {
+                    await userbase.deleteItem({
+                        databaseName: 'notes-database',
+                        itemId: item.itemId
+                    });
+                }
 
-        // Save cookies to the cloud
-        const cookies = document.cookie.split('; ').map(cookie => decodeURIComponent(cookie)).join('\n');
-        const chunkSize = 9000; // Set chunk size to be less than 10 KB
-        for (let i = 0; i < cookies.length; i += chunkSize) {
-            const chunk = cookies.substring(i, i + chunkSize);
-            await userbase.insertItem({
-                databaseName: 'notes-database',
-                item: { text: chunk }
-            });
-        }
+                // Save cookies to the cloud
+                const cookies = document.cookie.split('; ').map(cookie => decodeURIComponent(cookie)).join('\n');
+                const chunkSize = 9000; // Set chunk size to be less than 10 KB
+                for (let i = 0; i < cookies.length; i += chunkSize) {
+                    const chunk = cookies.substring(i, i + chunkSize);
+                    await userbase.insertItem({
+                        databaseName: 'notes-database',
+                        item: { text: chunk }
+                    });
+                }
+            }
+        });
     } catch (error) {
         console.error('Error saving cookies to cloud:', error);
         alert('Failed to save cookies to cloud: ' + error.message);
