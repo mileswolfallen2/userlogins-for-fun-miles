@@ -35,7 +35,6 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 
         // Open the Userbase database
         await openUserbaseDatabase();
-        displayCookies();
     } catch (error) {
         console.error('Login error:', error);
         alert('Login failed: ' + error.message);
@@ -52,7 +51,6 @@ async function checkUserLoggedIn() {
 
             // Open the Userbase database
             await openUserbaseDatabase();
-            displayCookies();
         }
     } catch (error) {
         console.error('Error checking user login status:', error);
@@ -150,6 +148,61 @@ async function logout() {
         alert('Logout failed: ' + error.message);
     }
 }
+
+// Function to save cookies to the cloud
+document.getElementById('save-cookies-cloud').addEventListener('click', async () => {
+    if (!isDatabaseOpen) {
+        alert('Database is not open. Please try again later.');
+        return;
+    }
+
+    try {
+        // Clear existing items in the database
+        const items = await userbase.getItems({ databaseName: 'notes-database' });
+        for (const item of items) {
+            await userbase.deleteItem({
+                databaseName: 'notes-database',
+                itemId: item.itemId
+            });
+        }
+
+        // Save cookies to the cloud
+        const cookies = document.cookie.split('; ').map(cookie => decodeURIComponent(cookie)).join('\n');
+        const chunkSize = 9000; // Set chunk size to be less than 10 KB
+        for (let i = 0; i < cookies.length; i += chunkSize) {
+            const chunk = cookies.substring(i, i + chunkSize);
+            await userbase.insertItem({
+                databaseName: 'notes-database',
+                item: { text: chunk }
+            });
+        }
+    } catch (error) {
+        console.error('Error saving cookies to cloud:', error);
+        alert('Failed to save cookies to cloud: ' + error.message);
+    }
+});
+
+// Function to load cookies from the cloud
+document.getElementById('load-cookies-cloud').addEventListener('click', async () => {
+    if (!isDatabaseOpen) {
+        alert('Database is not open. Please try again later.');
+        return;
+    }
+
+    try {
+        await userbase.openDatabase({
+            databaseName: 'notes-database',
+            changeHandler: function (items) {
+                const cookies = items.map(item => item.item.text).join('\n');
+                document.cookie = cookies.split('\n').map(cookie => encodeURIComponent(cookie.trim())).join('; ');
+                alert('Cookies loaded from cloud successfully!');
+            }
+        });
+    } catch (error) {
+        console.error('Error loading cookies from cloud:', error);
+        alert('Failed to load cookies from cloud: ' + error.message);
+    }
+});
 
 // Function to display cookies
 function displayCookies() {
